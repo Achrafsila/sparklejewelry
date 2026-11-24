@@ -58,3 +58,6 @@ begin
   end loop;
 end $$;
 alter default privileges in schema public revoke execute on functions from public, anon;
+
+-- The future shop's server calls this with the service_role key.
+grant execute on function public.place_site_order(uuid, jsonb) to service_role;
