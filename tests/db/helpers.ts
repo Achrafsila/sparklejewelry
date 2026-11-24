@@ -38,10 +38,13 @@ export async function freshDb(): Promise<TestDb> {
   await root.query(`create database ${name} template ${TEMPLATE_DB}`);
   await root.end();
 
-  const pool = new pg.Pool({ connectionString: `${PG_URL}/${name}`, max: 8 });
+  // `pool` always runs as the superuser; sessions come from a separate pool so a
+  // role set for one session never leaks into superuser queries.
+  const pool = new pg.Pool({ connectionString: `${PG_URL}/${name}`, max: 4 });
+  const sessions = new pg.Pool({ connectionString: `${PG_URL}/${name}`, max: 8 });
 
   async function connect(session: Session) {
-    const client = await pool.connect();
+    const client = await sessions.connect();
     await client.query('reset role');
     await client.query(`select set_config('request.jwt.claims', $1, false)`, [
       JSON.stringify(claimsFor[session]),
@@ -58,6 +61,7 @@ export async function freshDb(): Promise<TestDb> {
     asAnon: () => connect('anon'),
     async drop() {
       await pool.end();
+      await sessions.end();
       const c = new pg.Client({ connectionString: `${PG_URL}/postgres` });
       await c.connect();
       await c.query(`drop database if exists ${name} with (force)`);
