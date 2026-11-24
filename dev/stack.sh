@@ -6,7 +6,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-LOCAL="$ROOT/.local"
+# Outside the project on purpose: the project may sit in a cloud-synced folder (iCloud Desktop),
+# and database files must never be synced while Postgres writes them.
+LOCAL="${SPARKLE_LOCAL_DIR:-$HOME/Library/Application Support/sparkle-backoffice}"
 DATA="$LOCAL/pgdata"
 PORT=54329
 PGBIN="$(brew --prefix postgresql@17)/bin"
@@ -60,7 +62,7 @@ start_postgrest() {
     if curl -s -o /dev/null http://127.0.0.1:54331/; then return 0; fi
     sleep 0.1
   done
-  echo "PostgREST did not start; see .local/postgrest.log" >&2
+  echo "PostgREST did not start; see $LOCAL/postgrest.log" >&2
   return 1
 }
 

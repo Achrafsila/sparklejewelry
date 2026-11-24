@@ -3,13 +3,16 @@
 // Never part of `vite build`: vite.config.ts only imports this file for the dev server.
 import { randomUUID } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { dirname, extname, join, normalize } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Plugin } from 'vite';
 import { signHs256, verifyHs256 } from './jwt';
 
 const root = join(import.meta.dirname, '..');
-const storageRoot = join(root, '.local', 'storage');
+// Same folder as dev/stack.sh (outside the project, which may be cloud-synced).
+const localDir = process.env.SPARKLE_LOCAL_DIR ?? join(homedir(), 'Library', 'Application Support', 'sparkle-backoffice');
+const storageRoot = join(localDir, 'storage');
 const SESSION_SECONDS = 3600;
 
 interface DevUser {

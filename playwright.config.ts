@@ -1,4 +1,9 @@
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
+
+// Test artefacts go to the system temp folder, not into the (possibly cloud-synced) project.
+const artefacts = join(tmpdir(), 'sparkle-playwright');
 
 /**
  * End-to-end tests run the real UI against the local stack (Postgres + PostgREST + dev stub).
@@ -11,7 +16,8 @@ export default defineConfig({
   retries: 0,
   timeout: 45_000,
   expect: { timeout: 7_000 },
-  reporter: [['list'], ['html', { open: 'never' }]],
+  outputDir: join(artefacts, 'test-results'),
+  reporter: [['list'], ['html', { open: 'never', outputFolder: join(artefacts, 'report') }]],
   globalSetup: './tests/e2e/global-setup.ts',
   use: {
     baseURL: 'http://localhost:5173',
