@@ -23,11 +23,11 @@
 - Interface claire uniquement, `color-scheme: light`. Verre seulement sur navigation, barre d'actions, panneaux flottants, notifications ; jamais derrière un champ ou un tableau.
 - Pas de majuscules espacées, pas de chaînes « A · B · C », pas de flèche dans les boutons, cibles ≥ 44 px, champs en 16 px.
 - Le bouchon Auth/Storage ne doit jamais être inclus dans `vite build`.
-- Commits fréquents sur `feat/back-office`, message terminé par `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. Pas de push avant la tâche 15.
+- Commits fréquents sur `feat/back-office`, message terminé par `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. Pas de push avant la Task 15.
 
 ## Points de vigilance (non couverts par les scénarios de la demande)
 
-1. **Double clic / double onglet** sur « Confirmer », « Expédier », « Valider le retour » → une seule exécution. Test : `tests/db/idempotency.test.ts` (même `request_id` en parallèle) + E2E double clic (tâche 13).
+1. **Double clic / double onglet** sur « Confirmer », « Expédier », « Valider le retour » → une seule exécution. Test : `tests/db/idempotency.test.ts` (même `request_id` en parallèle) + E2E double clic (Task 13).
 2. **Photo HEIC ou fichier non image** sur ordinateur → erreur sous le champ photo, saisie conservée. Test : `tests/e2e/arrivals.spec.ts › photo illisible`.
 3. **Fermeture de l'onglet en pleine saisie** (arrivage, panier) → reprise à l'identique. Test : `arrivals.spec.ts › reprise après rechargement`, `orders.spec.ts › panier repris`.
 4. **Téléphone saisi sous plusieurs formes** (`06 12 34 56 78`, `+212612345678`, `0612345678`) → même cliente. Test : `tests/unit/phone.test.ts` + `tests/db/customers.test.ts`.
@@ -74,7 +74,7 @@ docs/{mise-en-service.md, boutique.md}
 
 ---
 
-### Tâche 1 : socle outillé et pile locale
+### Task 1: socle outillé et pile locale
 
 **Fichiers :** créer `package.json`, `tsconfig.json`, `vite.config.ts`, `vitest.config.ts`, `playwright.config.ts`, `eslint.config.js`, `.gitignore`, `dev/stack.sh`, `dev/postgrest.conf`, `dev/auth-shim.sql`, `tests/db/setup.ts`, `tests/db/helpers.ts`, `tests/db/smoke.test.ts` ; déplacer `index.html` → `legacy/prototype.html`.
 
@@ -93,7 +93,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] `.gitignore` : `node_modules, dist, .local, .env*.local, .DS_Store, test-results, playwright-report`.
 - [ ] Commit `chore: scaffold app, local Postgres/PostgREST stack and DB test harness`.
 
-### Tâche 2 : schéma, sécurité, idempotence
+### Task 2: schéma, sécurité, idempotence
 
 **Fichiers :** créer `supabase/migrations/0001_schema.sql`, `0002_core.sql`, `0008_rls.sql`, `dev/seed-dev.sql` ; test `tests/db/schema.test.ts`.
 
@@ -111,7 +111,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] Lancer → FAIL ; écrire les migrations ; `npm run db:reset && npm run test:db` → PASS.
 - [ ] Commit `feat(db): schema, RLS and request idempotency`.
 
-### Tâche 3 : arrivages, coût moyen, corrections
+### Task 3: arrivages, coût moyen, corrections
 
 **Fichiers :** `supabase/migrations/0003_stock.sql` ; test `tests/db/arrivals.test.ts`.
 
@@ -135,7 +135,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] FAIL → implémenter → PASS.
 - [ ] Commit `feat(db): receipts with weighted average cost and stock corrections`.
 
-### Tâche 4 : offres, brouillons, confirmation, commandes du site
+### Task 4: offres, brouillons, confirmation, commandes du site
 
 **Fichiers :** `supabase/migrations/0004_orders.sql` ; tests `tests/db/orders.test.ts`, `tests/db/concurrency.test.ts`, `tests/db/idempotency.test.ts`, `tests/db/customers.test.ts`.
 
@@ -161,7 +161,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] FAIL → implémenter → PASS (`assertLedger` après chaque test).
 - [ ] Commit `feat(db): offers resolution, drafts, atomic confirmation and site orders`.
 
-### Tâche 5 : préparation, expédition, retours, versements
+### Task 5: préparation, expédition, retours, versements
 
 **Fichiers :** `supabase/migrations/0005_fulfilment.sql` ; tests `tests/db/fulfilment.test.ts`, `tests/db/payouts.test.ts`.
 
@@ -182,7 +182,7 @@ docs/{mise-en-service.md, boutique.md}
   - `attendu d'un retour` : transport 3500 + frais 1500 → `order_expected_cents = -5000`.
 - [ ] FAIL → implémenter → PASS ; commit `feat(db): preparation, shipping, returns and carrier payouts`.
 
-### Tâche 6 : vues de lecture, recherche, pilotage, import/export
+### Task 6: vues de lecture, recherche, pilotage, import/export
 
 **Fichiers :** `supabase/migrations/0006_views.sql`, `0007_insights.sql`, `0009_storage.sql` ; tests `tests/db/views.test.ts`, `tests/db/dashboard.test.ts`, `tests/db/import.test.ts`.
 
@@ -202,7 +202,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] Tests : `v_offers.sellable` pour un trio fixe {Bronze ×2, Or ×1} avec Bronze 5, Or 4 → 2 ; `unit_sum_cents` ; `search_all('0612345678')` trouve la commande ; `dashboard` sur un jeu connu (2 livrées, 1 retour avec pièce perdue, emballage non réglé) → `missing` contient `packaging_unset` et `ad_spend_missing`, chiffres attendus calculés à la main dans le test ; `import_prototype` d'un JSON au format `{variants:[{sku,model,variant,photo,physical}], offers:[{type,skus,title,price,site,instagram,repeat}], receipts:[{supplier,received,lines:[{sku,qty,cost}]}]}` → comptes exacts, ledger cohérent.
 - [ ] FAIL → implémenter → PASS ; commit `feat(db): read views, search, dashboard and import/export`.
 
-### Tâche 7 : bibliothèques front
+### Task 7: bibliothèques front
 
 **Fichiers :** `src/lib/{money,phone,sku,drafts,errors,dates}.ts` ; tests `tests/unit/*.test.ts`.
 
@@ -217,7 +217,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] Tests : `parseMoney('15,50') === 1550`, `'15.50'` 1550, `'15'` 1500, `' 1 234,5 '` 123450, `'15,5,0'` null, `'-3'` null, `'1,234'` null, `''` null ; `normalizePhone` (trois formes → `+212612345678`, `'12'` null) ; `suggestSku('Bague Luna','Or', new Set())` = `BAGUE-LUNA-OR`, avec `BAGUE-LUNA-OR` pris → `BAGUE-LUNA-OR-2`, sans variante → `BAGUE-LUNA` ; `formatMoney(123450)` contient `1` `234,50` et `MAD` ; drafts : version différente → null.
 - [ ] FAIL → implémenter → PASS ; commit `feat(web): money, phone, sku, drafts and error helpers`.
 
-### Tâche 8 : bouchon local, client Supabase, coque et connexion
+### Task 8: bouchon local, client Supabase, coque et connexion
 
 **Fichiers :** `dev/supabase-stub.ts`, `dev/jwt.ts`, `dev/users.json`, `.env.local-stack`, `src/lib/supabase.ts`, `src/lib/rpc.ts`, `src/lib/useRequest.ts`, `src/app/*`, `src/features/auth/LoginPage.tsx`, `src/styles/*`, `index.html`, `vercel.json` ; tests `tests/e2e/fixtures.ts`, `tests/e2e/shell.spec.ts`.
 
@@ -234,7 +234,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] Vérifier `npm run build` puis `grep -r "supabase-stub\|users.json" dist` → aucun résultat.
 - [ ] Commit `feat(web): app shell, glass navigation, login and local Supabase stub`.
 
-### Tâche 9 : composants d'interface
+### Task 9: composants d'interface
 
 **Fichiers :** `src/ui/*.tsx`, `src/styles/forms.css`, route de dev `/dev/ui` (montée seulement en mode `local-stack`) ; test `tests/e2e/ui-kit.spec.ts`.
 
@@ -250,7 +250,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] Écrire `ui-kit.spec.ts` (projet WebKit mode sombre et Chromium) : sur `/dev/ui`, pour chaque `input, select, textarea`, couleur calculée du texte vs fond ≥ 4,5:1, `caret-color` défini (≠ `auto`), placeholder ≥ 4,5:1 ; après remplissage programmatique, texte identique ; un `select` ouvert garde des options lisibles (couleurs calculées des `option`) ; `.glass` absent de tout ancêtre de champ ; `Button pending` → `aria-busy="true"` et désactivé.
 - [ ] FAIL → implémenter → PASS ; commit `feat(web): UI kit with explicit form colors and states`.
 
-### Tâche 10 : Stock et Nouvel arrivage
+### Task 10: Stock et Nouvel arrivage
 
 **Fichiers :** `src/features/stock/*`, `src/features/arrivals/*`, `src/lib/photo.ts` ; test `tests/e2e/arrivals.spec.ts`, `tests/unit/photo.test.ts`.
 
@@ -274,7 +274,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] `photo.test.ts` (Vitest + jsdom non requis : tester le calcul `fitWithin(w, h, 1600)`).
 - [ ] FAIL → implémenter → PASS ; commit `feat(web): stock view and new arrival workspace`.
 
-### Tâche 11 : Offres
+### Task 11: Offres
 
 **Fichiers :** `src/features/offers/*` ; test `tests/e2e/offers.spec.ts`.
 
@@ -286,7 +286,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] Tests : créer une offre à l'unité à 2 variantes avec prix distincts ; un trio fixe (avertissement quand prix trop haut, disparition quand corrigé) ; un trio à composer ; mettre en pause Instagram → libellé « En pause » ; modifier le prix d'une offre ne change pas une commande confirmée existante (vérifié via `v_orders`).
 - [ ] FAIL → implémenter → PASS ; commit `feat(web): offers with unit, fixed trio and pick-your-trio formats`.
 
-### Tâche 12 : Commandes Instagram
+### Task 12: Commandes Instagram
 
 **Fichiers :** `src/features/orders/*` ; test `tests/e2e/orders.spec.ts`.
 
@@ -300,7 +300,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] Tests (scénarios 4–5) : trio fixe + unité → la fiche montre Bronze ×2 réservées, Stock affiche disponible 4 et l'alerte avec les offres, offres toujours « Active » ; trio à composer : compteur 0/3→3/3, pièce à 0 non sélectionnable, combinaison devenue indisponible (stock vidé entre-temps par une autre commande) → erreur sous « Confirmer » avec besoin/disponible, panier intact ; brouillon → aucune réservation, liste « Brouillon », reprise → confirmation ; cliente connue préremplie ; panier repris après rechargement ; double clic sur « Confirmer » → une seule réservation.
 - [ ] FAIL → implémenter → PASS ; commit `feat(web): Instagram order entry with customer recognition and drafts`.
 
-### Tâche 13 : Préparation, Suivi, retours, versements
+### Task 13: Préparation, Suivi, retours, versements
 
 **Fichiers :** `src/features/preparation/*`, `src/features/tracking/*` ; test `tests/e2e/fulfilment.spec.ts`.
 
@@ -312,7 +312,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] Tests (scénarios 6–7 côté interface) : préparer (bouton actif seulement quand tout est coché ; coche conservée après rechargement), expédier → Stock : physique −, réservé −, disponible inchangé ; livrer ; versement avec écart → fiche commande et versement affichent l'écart ; retour partiel avec une pièce abîmée → seule la revendable revient ; le formulaire de retour disparaît après validation (pas de second passage) ; annulation avant expédition libère ; double clic « Expédier » → une seule expédition ; recherche globale par référence de versement ouvre le versement.
 - [ ] FAIL → implémenter → PASS ; commit `feat(web): preparation, shipping, tracking, returns and payouts`.
 
-### Tâche 14 : Pilotage, Réglages, recherche globale, import/export
+### Task 14: Pilotage, Réglages, recherche globale, import/export
 
 **Fichiers :** `src/features/dashboard/*`, `src/features/settings/*`, `src/features/search/GlobalSearch.tsx` ; test `tests/e2e/insights.spec.ts`.
 
@@ -324,7 +324,7 @@ docs/{mise-en-service.md, boutique.md}
 - [ ] Tests : pilotage sur le jeu des tâches précédentes → coûts manquants listés avant la marge ; filtre canal Site → chiffres à 0 et budget pub signalé « non réparti » ; réglage emballage → l'avertissement disparaît ; import d'un fichier prototype de test → comptes affichés puis stock créé ; recherche « / » + numéro `SPK-0001`.
 - [ ] FAIL → implémenter → PASS ; commit `feat(web): dashboard, settings, global search and import/export`.
 
-### Tâche 15 : vérification finale, revues, documentation, PR
+### Task 15: vérification finale, revues, documentation, PR
 
 **Fichiers :** `docs/mise-en-service.md`, `docs/boutique.md`, `README.md` ; corrections issues des revues.
 
@@ -339,4 +339,4 @@ docs/{mise-en-service.md, boutique.md}
 
 ## Exécution
 
-Méthode : **Native** (superpowers:executing-plans) — la demande impose d'exécuter sans confirmation de routine et de ne pas multiplier les sous-agents ; une revue de branche complète a lieu en tâche 15.
+Méthode : **Native** (superpowers:executing-plans) — la demande impose d'exécuter sans confirmation de routine et de ne pas multiplier les sous-agents ; une revue de branche complète a lieu en Task 15.
