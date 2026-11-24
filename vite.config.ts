@@ -9,18 +9,20 @@ export default defineConfig(async ({ command, mode }) => {
     const { supabaseStub } = await import('./dev/supabase-stub');
     plugins.push(supabaseStub());
   }
+  const restProxy = {
+    '/rest/v1': {
+      target: 'http://127.0.0.1:54331',
+      rewrite: (path: string) => path.replace(/^\/rest\/v1/, ''),
+    },
+  };
   return {
     plugins,
+    preview: localStack ? { proxy: restProxy } : undefined,
     server: localStack
       ? {
           // Test artefacts, local storage and ledgers change constantly: never reload the app for them.
           watch: { ignored: ['**/test-results/**', '**/playwright-report/**', '**/.local/**', '**/.superpowers/**', '**/docs/**'] },
-          proxy: {
-            '/rest/v1': {
-              target: 'http://127.0.0.1:54331',
-              rewrite: (path: string) => path.replace(/^\/rest\/v1/, ''),
-            },
-          },
+          proxy: restProxy,
         }
       : undefined,
     build: {

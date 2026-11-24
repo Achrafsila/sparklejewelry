@@ -42,9 +42,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev -- --port 5173 --strictPort',
+    // The built app (closer to production, and fast even on a busy machine), with the local stub.
+    command: 'npm run e2e:serve',
     url: 'http://localhost:5173',
     reuseExistingServer: true,
-    timeout: 60_000,
+    timeout: 180_000,
   },
 });

@@ -89,12 +89,7 @@ function safePath(objectPath: string) {
   return target.startsWith(storageRoot) ? target : null;
 }
 
-export function supabaseStub(): Plugin {
-  return {
-    name: 'sparkle-supabase-stub',
-    apply: 'serve',
-    configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
+async function stub(req: IncomingMessage, res: ServerResponse, next: () => void) {
         const url = new URL(req.url ?? '/', 'http://localhost');
         const path = url.pathname;
         try {
@@ -156,7 +151,18 @@ export function supabaseStub(): Plugin {
           return send(res, 500, { message: (e as Error).message });
         }
         next();
-      });
+}
+
+/** Mounted on the dev server and on `vite preview` (used by the E2E tests on the built app). */
+export function supabaseStub(): Plugin {
+  return {
+    name: 'sparkle-supabase-stub',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => void stub(req, res, next));
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use((req, res, next) => void stub(req, res, next));
     },
   };
 }
