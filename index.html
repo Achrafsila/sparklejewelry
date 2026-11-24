@@ -57,29 +57,29 @@ function stock(){
   <section>${table(['Bijou','Référence','Physique','Réservé','Disponible'],data.variants.map(v=>[`${v.photo?`<img class="thumb" alt="" src="${e(v.photo)}">`:''}${e(name(v.sku))}`,e(v.sku),v.physical,reserved(v.sku),available(v.sku)]),'Aucune référence enregistrée.')}</section>
   <h2>Nouvel arrivage</h2>
   <div class="arrival-layout">
-   <form id="receipt-new">
+   <form id="receipt-new" novalidate>
     <h3>Nouveau modèle</h3>
     <div class="grid">
      <label>Référence<input name="sku" placeholder="Générée si vide"></label>
      ${required('Modèle','model','list="models"')}<datalist id="models">${[...new Set(data.variants.map(v=>v.model))].map(m=>`<option value="${e(m)}"></option>`).join('')}</datalist>
      <label>Variante (facultatif)<input name="variant" placeholder="Argenté"></label>
-     ${required('Quantité','qty','type="number" min="1" step="1"')}${amount('Coût unitaire (MAD)','cost')}
+     ${required('Quantité','qty','type="number" min="1" step="1"')}<label>Coût unitaire (MAD)<input name="cost" inputmode="decimal" required></label>
     </div>
     <fieldset><legend>Photo</legend><div class="grid">
      <label>Choisir une photo<input name="photo" type="file" accept="image/*"></label>
      <label>Prendre une photo<input name="camera" type="file" accept="image/*" capture="environment"></label>
     </div></fieldset>
-    <button class="primary">Ajouter à l’arrivage</button>
+    <button type="submit" class="primary">Ajouter à l’arrivage</button><small class="error" role="alert"></small>
    </form>
-   <form id="receipt-existing">
+   <form id="receipt-existing" novalidate>
     <h3>Modèle existant</h3>
     ${data.variants.length?`<div class="grid">
      ${selectable('Modèle et variante','existing','<option value="">Sélectionner</option>'+options(data.variants.map(v=>[v.sku,name(v.sku)+' · '+v.sku])))}
-     ${required('Quantité','qty','type="number" min="1" step="1"')}${amount('Coût unitaire (MAD)','cost')}
-    </div><p><button class="primary">Ajouter à l’arrivage</button></p>`:'<p class="muted">Les modèles apparaîtront ici après validation de leur premier arrivage.</p>'}
+     ${required('Quantité','qty','type="number" min="1" step="1"')}<label>Coût unitaire (MAD)<input name="cost" inputmode="decimal" required></label>
+    </div><p><button type="submit" class="primary">Ajouter à l’arrivage</button><small class="error" role="alert"></small></p>`:'<p class="muted">Les modèles apparaîtront ici après validation de leur premier arrivage.</p>'}
    </form>
   </div>
-  ${receipt.length?`<form id="receipt"><div class="grid">${required('Fournisseur','supplier')}${required('Date de réception','received','type="date" value="'+date().slice(0,10)+'"')}</div>
+  ${receipt.length?`<form id="receipt"><h3>Pièces ajoutées à l’arrivage (${receipt.length})</h3><div class="grid">${required('Fournisseur','supplier')}${required('Date de réception','received','type="date" value="'+date().slice(0,10)+'"')}</div>
   ${table(['Référence','Quantité','Coût unitaire',''],receipt.map((r,i)=>[e(r.sku),r.qty,money(r.cost),button('Retirer','remove-receipt',i)]),'')}
   <p><button class="primary">Valider l’arrivage</button></p></form>`:''}
   <section><h2>Historique des arrivages</h2>${table(['Date','Fournisseur','Détail','Total'],data.receipts.map(r=>[e(r.received),e(r.supplier),r.lines.map(l=>`${e(l.sku)} × ${l.qty} à ${money(l.cost)}`).join('<br>'),money(r.lines.reduce((n,l)=>n+l.qty*l.cost,0))]),'Les arrivages validés apparaissent ici.')}</section>`;
@@ -147,6 +147,7 @@ function image(file){
   const photo=new Image();
   photo.onload=()=>{
    URL.revokeObjectURL(url);
+   try {
    const scale=Math.min(1,960/Math.max(photo.width,photo.height));
    const canvas=document.createElement('canvas');
    canvas.width=Math.max(1,Math.round(photo.width*scale));
@@ -156,6 +157,7 @@ function image(file){
    ctx.fillRect(0,0,canvas.width,canvas.height);
    ctx.drawImage(photo,0,0,canvas.width,canvas.height);
    resolve(canvas.toDataURL('image/jpeg',0.8));
+   } catch { reject(Error('Impossible de préparer la photo. Essaie une autre image.')); }
   };
   photo.onerror=()=>{URL.revokeObjectURL(url);reject(Error('Format illisible. Essaie une photo JPEG ou PNG.'));};
   photo.src=url;
@@ -199,6 +201,10 @@ document.addEventListener('submit',async event=>{
  const f=new FormData(form);
  try{
   if(['receipt-new','receipt-existing'].includes(form.id)){
+   const qty=Number(f.get('qty'));
+   const rawCost=f.get('cost').trim().replace(',','.');
+   if(!Number.isSafeInteger(qty)||qty<1)throw Error('Indique une quantité entière supérieure à zéro.');
+   if(!/^\d+(?:\.\d{1,2})?$/.test(rawCost)||!Number.isSafeInteger(cents(rawCost)))throw Error('Indique un coût valide, par exemple 30 ou 30,50.');
    const existing=bySku(f.get('existing'));
    if(form.id==='receipt-existing'&&!existing)throw Error('Sélectionne un modèle et sa variante.');
    const model=existing?.model??f.get('model').trim();
@@ -210,8 +216,9 @@ document.addEventListener('submit',async event=>{
    if(!sku||(!existing&&!same&&bySku(sku))||receipt.some(r=>r.sku===sku))throw Error('Référence déjà utilisée ou déjà présente dans cet arrivage.');
    const photo=existing ? existing.photo : await image(f.get('camera')?.size ? f.get('camera') : f.get('photo'));
    if(receipt.some(r=>r.sku===sku))throw Error('Référence déjà présente dans cet arrivage.');
-   receipt.push({sku,model,variant,qty:Number(f.get('qty')),cost:cents(f.get('cost')),photo});
+   receipt.push({sku,model,variant,qty,cost:cents(rawCost),photo});
    render();message('Ligne ajoutée à l’arrivage.');
+   document.querySelector('#receipt')?.scrollIntoView({block:'nearest'});
   }
   if(form.id==='receipt'){
    const lines=receipt.map(({sku,qty,cost})=>({sku,qty,cost}));
@@ -260,7 +267,11 @@ document.addEventListener('submit',async event=>{
     }
    },'Commande mise à jour.');
   }
- }catch(error){message(error.message,true);}
+ }catch(error){
+  const inlineError=form.querySelector('small[role="alert"]');
+  if(inlineError)inlineError.textContent=error.message;
+  message(error.message,true);
+ }
 });
 render();
 </script>
