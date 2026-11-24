@@ -12,9 +12,10 @@ import { InlineStatus, Notice, type InlineState } from '../../ui/Feedback';
 import { Field } from '../../ui/Field';
 import { PhotoInput } from '../../ui/PhotoInput';
 import { PhotoSlot } from '../../ui/PhotoSlot';
-import { Sheet } from '../../ui/Sheet';
+import { ConfirmDialog, Sheet } from '../../ui/Sheet';
 import { StatusBadge } from '../../ui/StatusBadge';
-import { MOVEMENT_LABELS, STOCK_KEY, useMovements, useReceipts, type StockRow } from './useStock';
+import { OFFERS_KEY } from '../offers/useOffers';
+import { MOVEMENT_LABELS, RECEIPTS_KEY, STOCK_KEY, useMovements, useReceipts, type StockRow } from './useStock';
 
 interface Alert {
   sku: string;
@@ -23,11 +24,79 @@ interface Alert {
   offers: { id: string; name: string }[];
 }
 
-export function VariantSheet({ row, onClose }: { row: StockRow | null; onClose(): void }) {
+interface VariantSheetProps {
+  row: StockRow | null;
+  onClose(): void;
+  /** Called once the reference is deleted or withdrawn, with the message to show on the stock page. */
+  onDeleted(message: string): void;
+}
+
+export function VariantSheet({ row, onClose, onDeleted }: VariantSheetProps) {
+  const [confirming, setConfirming] = useState(false);
+  const remove = useRequest<{ p_variant_id: string }, { mode: 'deleted' | 'archived' }>('delete_variant');
+  const { mutate } = useSWRConfig();
+
+  async function confirmDelete() {
+    if (!row) return;
+    const name = row.name;
+    const result = await remove.run({ p_variant_id: row.variant_id });
+    if (!result) return;
+    setConfirming(false);
+    await Promise.all([mutate(STOCK_KEY), mutate(OFFERS_KEY), mutate(RECEIPTS_KEY)]);
+    onDeleted(
+      result.mode === 'deleted'
+        ? `Référence supprimée : ${name}.`
+        : `Référence retirée du stock : ${name}. Les commandes qui la contiennent la gardent dans leur historique.`,
+    );
+  }
+
   return (
-    <Sheet open={row != null} title={row?.name ?? ''} onClose={onClose}>
-      {row && <VariantDetails key={row.variant_id} row={row} />}
-    </Sheet>
+    <>
+      <Sheet
+        open={row != null}
+        title={row?.name ?? ''}
+        onClose={onClose}
+        footer={
+          row && !row.archived ? (
+            <Button
+              variant="danger"
+              onClick={() => {
+                remove.reset();
+                setConfirming(true);
+              }}
+            >
+              Supprimer la référence
+            </Button>
+          ) : undefined
+        }
+      >
+        {row && <VariantDetails key={row.variant_id} row={row} />}
+      </Sheet>
+      <ConfirmDialog
+        open={confirming && row != null}
+        title="Supprimer cette référence ?"
+        confirmLabel="Supprimer"
+        danger
+        pending={remove.pending}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirming(false)}
+      >
+        {row && (
+          <>
+            <p>
+              « {row.name} » ({row.sku}) disparaîtra du stock, des arrivages et des choix d’offres.
+            </p>
+            {row.physical_qty > 1 ? (
+              <p>Les {row.physical_qty} pièces encore en stock seront retirées.</p>
+            ) : row.physical_qty === 1 ? (
+              <p>La pièce encore en stock sera retirée.</p>
+            ) : null}
+            <p>Si elle figure déjà dans des commandes, ces commandes la gardent dans leur historique.</p>
+            <InlineStatus state={remove.error ? 'error' : 'idle'}>{remove.error ? messageFor(remove.error) : null}</InlineStatus>
+          </>
+        )}
+      </ConfirmDialog>
+    </>
   );
 }
 
@@ -48,6 +117,12 @@ function VariantDetails({ row }: { row: StockRow }) {
           {row.available_qty <= 0 ? <StatusBadge status="out" /> : row.is_low ? <StatusBadge status="low" /> : null}
         </div>
       </div>
+
+      {row.archived && (
+        <Notice tone="info" title="Référence retirée du stock.">
+          <p>Elle reste dans l’historique des commandes. Un nouvel arrivage par « Modèle existant » la remet en stock.</p>
+        </Notice>
+      )}
 
       <dl className="kv">
         <dt>Physique</dt>

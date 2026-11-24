@@ -95,6 +95,23 @@ describe('errors', () => {
     expect(messageFor(new AppError('TRIO_INVALIDE', { reason: 'count' }))).toMatch(/trois pièces/);
   });
 
+  test('a reference used by offers names them', () => {
+    expect(messageFor(new AppError('REFERENCE_DANS_OFFRES', { offers: ['Trio rivières'] }))).toBe(
+      'Cette référence est utilisée par l’offre « Trio rivières ». Retirez-la de cette offre ou supprimez l’offre d’abord.',
+    );
+    expect(messageFor(new AppError('REFERENCE_DANS_OFFRES', { offers: ['A', 'B'] }))).toBe(
+      'Cette référence est utilisée par les offres « A », « B ». Retirez-la de ces offres ou supprimez-les d’abord.',
+    );
+  });
+
+  test('reserved pieces and a vanished item have their own message', () => {
+    expect(messageFor(new AppError('REFERENCE_RESERVEE', { reserved: 2 }))).toBe(
+      '2 pièces de cette référence sont réservées par des commandes en cours. Expédiez ou annulez ces commandes d’abord.',
+    );
+    expect(messageFor(new AppError('REFERENCE_RESERVEE', { reserved: 1 }))).toMatch(/^1 pièce de cette référence est réservée/);
+    expect(messageFor(new AppError('INTROUVABLE'))).toBe('Cet élément a déjà été supprimé. Rechargez la page.');
+  });
+
   test('unknown codes get a generic message', () => {
     expect(messageFor(new AppError('XYZ'))).toBe('Une erreur est survenue. Réessayez.');
   });

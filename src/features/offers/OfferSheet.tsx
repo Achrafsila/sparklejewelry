@@ -1,4 +1,5 @@
 import { useId, useRef, useState, type FormEvent } from 'react';
+import { Link } from 'react-router';
 import { centsToInput, formatMoney, parseMoney } from '../../lib/money';
 import { messageFor, invalidField, toAppError } from '../../lib/errors';
 import { preparePhoto, uploadPhoto } from '../../lib/photo';
@@ -9,6 +10,7 @@ import { InlineStatus, Notice } from '../../ui/Feedback';
 import { Field } from '../../ui/Field';
 import { MoneyField } from '../../ui/MoneyField';
 import { PhotoInput } from '../../ui/PhotoInput';
+import { pendingArrivalLines } from '../arrivals/arrivalDraft';
 import type { StockRow } from '../stock/useStock';
 import { ReferencePicker } from './ReferencePicker';
 import { TrioPicker } from './TrioPicker';
@@ -22,6 +24,26 @@ interface Props {
 }
 
 type Errors = Partial<Record<'name' | 'price' | 'items' | 'photo' | string, string>>;
+
+/** Shown instead of the composition when no reference is in stock yet. */
+function NoStockNotice() {
+  const [pending] = useState(pendingArrivalLines);
+  return (
+    <Notice tone="info" title="Aucune référence en stock pour composer cette offre.">
+      {pending > 0 ? (
+        <p>
+          Votre arrivage en cours compte {pending} ligne{pending > 1 ? 's' : ''} pas encore validée{pending > 1 ? 's' : ''} : validez-le pour que ses
+          pièces apparaissent ici.
+        </p>
+      ) : (
+        <p>Les pièces d’une offre viennent du stock : validez d’abord un arrivage.</p>
+      )}
+      <Link to="/stock/arrivage" className="btn btn--secondary btn--small notice__action">
+        {pending > 0 ? 'Reprendre l’arrivage' : 'Nouvel arrivage'}
+      </Link>
+    </Notice>
+  );
+}
 
 function initialFixed(offer: OfferRow | null): string[] {
   if (!offer || offer.kind !== 'fixed_trio') return [];
@@ -51,6 +73,7 @@ export function OfferForm({ offer, offers, stock, onSaved }: Props) {
   const [uploading, setUploading] = useState(false);
   const save = useRequest<{ p_offer: object }, { offer_id: string }>('save_offer');
 
+  const hasReferences = stock.some((s) => !s.archived);
   const available = (id: string) => stock.find((s) => s.variant_id === id)?.available_qty ?? 0;
   const unitPrices = minUnitPrices(offers.filter((o) => o.id !== offer?.id));
   const fixedComposition = [...composition(fixedIds)];
@@ -143,7 +166,11 @@ export function OfferForm({ offer, offers, stock, onSaved }: Props) {
 
       {kind === 'unit' && (
         <>
-          <ReferencePicker legend="Références vendues" stock={stock} selected={unitIds} onChange={setUnitIds} error={errors.items} />
+          {hasReferences ? (
+            <ReferencePicker legend="Références vendues" stock={stock} selected={unitIds} onChange={setUnitIds} error={errors.items} />
+          ) : (
+            <NoStockNotice />
+          )}
           {unitIds.length > 1 && (
             <fieldset className="kind-choice">
               <legend>Prix</legend>
@@ -183,7 +210,11 @@ export function OfferForm({ offer, offers, stock, onSaved }: Props) {
 
       {kind === 'fixed_trio' && (
         <>
-          <TrioPicker mode="fixed" label="Composition du trio" candidates={stock.filter((s) => !s.archived)} value={fixedIds} allowRepeat onChange={setFixedIds} />
+          {hasReferences ? (
+            <TrioPicker mode="fixed" label="Composition du trio" candidates={stock.filter((s) => !s.archived)} value={fixedIds} allowRepeat onChange={setFixedIds} />
+          ) : (
+            <NoStockNotice />
+          )}
           {errors.items && (
             <p className="field__error" role="alert">
               {errors.items}
@@ -208,7 +239,11 @@ export function OfferForm({ offer, offers, stock, onSaved }: Props) {
 
       {kind === 'custom_trio' && (
         <>
-          <ReferencePicker legend="Pièces éligibles" stock={stock} selected={eligibleIds} onChange={setEligibleIds} error={errors.items} />
+          {hasReferences ? (
+            <ReferencePicker legend="Pièces éligibles" stock={stock} selected={eligibleIds} onChange={setEligibleIds} error={errors.items} />
+          ) : (
+            <NoStockNotice />
+          )}
           <Switch label="Autoriser la même pièce plusieurs fois" checked={allowRepeat} onChange={setAllowRepeat} onText="Autorisé" offText="Non autorisé" />
           <MoneyField label="Prix de vente" value={price} onChange={setPrice} error={errors.price} hint="Prix fixe, affiché avant le choix des pièces." />
           <p className="num muted">{availabilityLabel('custom_trio', eligibleIds.filter((id) => available(id) > 0).length)}</p>

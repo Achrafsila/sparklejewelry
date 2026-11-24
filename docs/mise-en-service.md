@@ -23,9 +23,12 @@ Dans **SQL Editor**, exécutez les fichiers de `supabase/migrations/` **dans l�
 0008_rls.sql
 0009_storage.sql
 0010_offers.sql
+0011_delete.sql
 ```
 
 Chaque fichier doit se terminer par « Success ». `0009_storage.sql` crée le dossier de photos `photos` (lecture publique, écriture réservée au compte administrateur).
+
+**Mise à jour d’une base déjà installée** : n’exécutez que les nouveaux fichiers, dans l’ordre. Par exemple, `0011_delete.sql` ajoute la suppression des références et des offres. Exécutez-le **avant** de mettre en ligne la version du site qui l’utilise.
 
 > Avec la CLI Supabase, c’est équivalent : `supabase link` puis `supabase db push`.
 

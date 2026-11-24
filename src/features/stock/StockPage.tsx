@@ -4,7 +4,7 @@ import { ActionBar } from '../../app/ActionBar';
 import { Segmented } from '../../ui/Controls';
 import { DataList, type Column } from '../../ui/DataList';
 import { EmptyState } from '../../ui/EmptyState';
-import { Notice } from '../../ui/Feedback';
+import { InlineStatus, Notice } from '../../ui/Feedback';
 import { IconPlus, IconSearch } from '../../ui/icons';
 import { PageHeader } from '../../ui/PageHeader';
 import { PhotoSlot } from '../../ui/PhotoSlot';
@@ -34,6 +34,7 @@ export function StockPage() {
   const settings = useSettings();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
+  const [saved, setSaved] = useState<string | null>(null);
   const deferredQuery = useDeferredValue(query);
 
   const rows = stock.data;
@@ -127,6 +128,7 @@ export function StockPage() {
           </>
         }
       />
+      <InlineStatus state={saved ? 'success' : 'idle'}>{saved}</InlineStatus>
 
       {low.length > 0 && filter === 'all' && !deferredQuery && (
         <div className="stock-alert">
@@ -205,7 +207,14 @@ export function StockPage() {
         </Link>
       </ActionBar>
 
-      <VariantSheet row={selected} onClose={() => navigate('/stock')} />
+      <VariantSheet
+        row={selected}
+        onClose={() => navigate('/stock')}
+        onDeleted={(message) => {
+          setSaved(message);
+          navigate('/stock');
+        }}
+      />
     </>
   );
 }

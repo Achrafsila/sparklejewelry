@@ -6,6 +6,7 @@ import { messageFor, toAppError } from '../../lib/errors';
 import { formatMoney } from '../../lib/money';
 import { read } from '../../lib/rpc';
 import { supabase } from '../../lib/supabase';
+import { useRequest } from '../../lib/useRequest';
 import { Button } from '../../ui/Button';
 import { Segmented, Skeleton, Switch } from '../../ui/Controls';
 import { DataList, type Column } from '../../ui/DataList';
@@ -45,6 +46,8 @@ export function OffersPage() {
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
   const [archiving, setArchiving] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const remove = useRequest<{ p_offer_id: string }, { deleted: boolean }>('delete_offer');
 
   const editing = offerId ? (offers.data?.find((o) => o.id === offerId) ?? null) : null;
   const rows = offers.data?.filter((o) => (view === 'archived' ? o.archived : !o.archived));
@@ -78,6 +81,17 @@ export function OffersPage() {
     } finally {
       setArchiving(false);
     }
+  }
+
+  async function deleteOffer() {
+    if (!editing) return;
+    const name = editing.name;
+    const result = await remove.run({ p_offer_id: editing.id });
+    if (!result) return;
+    setConfirmDelete(false);
+    await Promise.all([mutate(OFFERS_KEY), mutate(STOCK_KEY)]);
+    setSaved(`Offre supprimée : ${name}.`);
+    navigate('/offres');
   }
 
   const switches = (o: OfferRow) => (
@@ -208,10 +222,23 @@ export function OffersPage() {
         title={creating ? 'Nouvelle offre' : (editing?.name ?? '')}
         onClose={() => navigate('/offres')}
         footer={
-          editing && !editing.archived ? (
-            <Button variant="danger" onClick={() => setConfirmArchive(true)}>
-              Archiver l’offre
-            </Button>
+          editing ? (
+            <>
+              {editing.archived ? null : (
+                <Button variant="secondary" onClick={() => setConfirmArchive(true)}>
+                  Archiver l’offre
+                </Button>
+              )}
+              <Button
+                variant="danger"
+                onClick={() => {
+                  remove.reset();
+                  setConfirmDelete(true);
+                }}
+              >
+                Supprimer l’offre
+              </Button>
+            </>
           ) : undefined
         }
       >
@@ -244,6 +271,18 @@ export function OffersPage() {
         onCancel={() => setConfirmArchive(false)}
       >
         <p>Elle ne sera plus proposée dans les nouvelles commandes. Les commandes passées gardent leur nom, leur prix et leur composition.</p>
+      </ConfirmDialog>
+      <ConfirmDialog
+        open={confirmDelete && editing != null}
+        title="Supprimer cette offre ?"
+        confirmLabel="Supprimer"
+        danger
+        pending={remove.pending}
+        onConfirm={deleteOffer}
+        onCancel={() => setConfirmDelete(false)}
+      >
+        <p>« {editing?.name} » sera effacée définitivement. Les commandes passées gardent son nom, son prix et sa composition.</p>
+        <InlineStatus state={remove.error ? 'error' : 'idle'}>{remove.error ? messageFor(remove.error) : null}</InlineStatus>
       </ConfirmDialog>
     </>
   );

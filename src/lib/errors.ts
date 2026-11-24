@@ -75,6 +75,21 @@ export function messageFor(error: AppError): string {
       return 'Le nombre de pièces abîmées dépasse le nombre de pièces expédiées.';
     case 'IMPORT_CONFLIT':
       return 'Certaines références existent déjà. Rien n’a été importé.';
+    case 'REFERENCE_DANS_OFFRES': {
+      const offers = d && !Array.isArray(d) && Array.isArray(d.offers) ? d.offers.map(String) : [];
+      const names = offers.map((n) => `« ${n} »`).join(', ');
+      return offers.length > 1
+        ? `Cette référence est utilisée par les offres ${names}. Retirez-la de ces offres ou supprimez-les d’abord.`
+        : `Cette référence est utilisée par l’offre ${names}. Retirez-la de cette offre ou supprimez l’offre d’abord.`;
+    }
+    case 'REFERENCE_RESERVEE': {
+      const n = d && !Array.isArray(d) ? Number(d.reserved ?? 0) : 0;
+      return n > 1
+        ? `${n} pièces de cette référence sont réservées par des commandes en cours. Expédiez ou annulez ces commandes d’abord.`
+        : `${n} pièce de cette référence est réservée par une commande en cours. Expédiez ou annulez cette commande d’abord.`;
+    }
+    case 'INTROUVABLE':
+      return 'Cet élément a déjà été supprimé. Rechargez la page.';
     case 'PHOTO_ILLISIBLE':
       return 'Photo illisible. Essayez une photo JPEG ou PNG.';
     case 'PHOTO_ENVOI':

@@ -18,14 +18,14 @@ interface Props {
   onAdd(line: ArrivalLine): void;
 }
 
-export function ItemLine({ row }: { row: Pick<StockRow, 'name' | 'sku' | 'photo_path' | 'available_qty'> }) {
+export function ItemLine({ row }: { row: Pick<StockRow, 'name' | 'sku' | 'photo_path' | 'available_qty'> & { archived?: boolean } }) {
   return (
     <span className="item-line">
       <PhotoSlot size={40} path={row.photo_path} />
       <span className="item-line__text">
         <span className="item-line__name">{row.name}</span>
         <span className="item-line__meta">
-          {row.sku}, {row.available_qty} disponible{row.available_qty > 1 ? 's' : ''}
+          {row.sku}, {row.archived ? 'retirée du stock' : `${row.available_qty} disponible${row.available_qty > 1 ? 's' : ''}`}
         </span>
       </span>
     </span>
@@ -98,7 +98,7 @@ export function ExistingModelForm({ stock, receipts, lines, onAdd }: Props) {
           ) : (
             <Combobox
               label="Modèle et variante"
-              items={stock.filter((s) => !s.archived)}
+              items={stock}
               getKey={(s) => s.variant_id}
               getText={(s) => `${s.name} ${s.sku}`}
               renderItem={(s) => <ItemLine row={s} />}
