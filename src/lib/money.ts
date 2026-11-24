@@ -18,7 +18,8 @@ const formatter = new Intl.NumberFormat('fr-MA', {
 
 export function formatMoney(cents: number): string {
   // Plain hyphen for negative amounts, whatever minus sign the browser's locale data uses.
-  return formatter.format(cents / 100).replace(/\u2212/g, '-');
+  // `+ 0` turns -0 into 0, so an empty deduction never reads "-0,00".
+  return formatter.format(cents / 100 + 0).replace(/\u2212/g, '-');
 }
 
 /** Editable text for a money field: "15,50", or "35" when there are no cents. */

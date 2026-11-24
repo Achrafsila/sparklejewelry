@@ -26,6 +26,11 @@ describe('formatMoney', () => {
     expect(text).toMatch(/MAD/);
   });
 
+  test('a zero cost shown as a deduction is never "-0,00"', () => {
+    expect(formatMoney(-0)).not.toMatch(/^-/);
+    expect(formatMoney(-0)).toMatch(/^0,00/);
+  });
+
   test('formats negative amounts', () => {
     expect(formatMoney(-2000)).toMatch(/-\s?20,00|−\s?20,00/);
   });
