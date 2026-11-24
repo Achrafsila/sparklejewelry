@@ -1,0 +1,13 @@
+# Only what the build needs goes to Vercel.
+.claude
+.superpowers
+.local
+tests
+docs
+legacy
+dist
+dist-e2e
+test-results
+playwright-report
+skills-lock.json
+.env*.local
