@@ -121,6 +121,13 @@ export function supabaseStub(): Plugin {
             const u = users().find((x) => x.id === claims?.sub);
             return u ? send(res, 200, userJson(u)) : send(res, 401, { msg: 'invalid JWT' });
           }
+          if (path === '/auth/v1/user' && req.method === 'PUT') {
+            // Password change after a reset link: accepted, not persisted (local test account).
+            const claims = bearer(req);
+            const u = users().find((x) => x.id === claims?.sub);
+            await readBody(req);
+            return u ? send(res, 200, userJson(u)) : send(res, 401, { msg: 'invalid JWT' });
+          }
           if (path === '/auth/v1/logout') return send(res, 204);
           if (path === '/auth/v1/recover') return send(res, 200, {});
 

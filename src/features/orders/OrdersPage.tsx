@@ -10,22 +10,11 @@ import { EmptyState } from '../../ui/EmptyState';
 import { IconPlus, IconSearch } from '../../ui/icons';
 import { PageHeader } from '../../ui/PageHeader';
 import { Sheet } from '../../ui/Sheet';
-import { ChannelBadge, StatusBadge, type OrderStatus } from '../../ui/StatusBadge';
+import { ChannelBadge, StatusBadge } from '../../ui/StatusBadge';
+import { ORDER_VIEWS as VIEWS, type OrderView as View } from './orderViews';
 import { OrderDetails } from './OrderSheet';
 import { useOrders, type OrderRow } from './useOrders';
 import './orders.css';
-
-type View = 'all' | 'drafts' | 'to_prepare' | 'shipping' | 'done' | 'returns' | 'cancelled';
-
-const VIEWS: Record<View, { label: string; statuses: OrderStatus[] | null }> = {
-  all: { label: 'Toutes', statuses: null },
-  drafts: { label: 'Brouillons', statuses: ['brouillon'] },
-  to_prepare: { label: 'À préparer', statuses: ['confirmee', 'preparee'] },
-  shipping: { label: 'En livraison', statuses: ['en_livraison', 'livree'] },
-  done: { label: 'Payées', statuses: ['payee'] },
-  returns: { label: 'Retours', statuses: ['retour_attendu', 'retour_recu'] },
-  cancelled: { label: 'Annulées', statuses: ['annulee'] },
-};
 
 const fold = (s: string) =>
   s

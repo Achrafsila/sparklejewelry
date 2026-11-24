@@ -87,6 +87,8 @@ export function NewOrderPage() {
   const [customerErrors, setCustomerErrors] = useState<Partial<Record<keyof CustomerInput | 'shippingFee', string>>>({});
   const [localError, setLocalError] = useState<string | null>(null);
   const busy = useRef(false);
+  // Payload of a confirmation whose answer was lost on the network (the server may have applied it).
+  const unanswered = useRef<string | null>(null);
   const doneRef = useRef<HTMLDivElement>(null);
   const saveDraft = useRequest<{ p_order: object }, { order_id: string; number: string }>('save_order_draft');
   const confirmOrder = useRequest<{ p_order_id: string }, { order_id: string; number: string; alerts: Alert[] }>('confirm_order');
@@ -120,6 +122,29 @@ export function NewOrderPage() {
 
   async function submit(confirm: boolean) {
     if (busy.current) return;
+    const payload = {
+      id: cart.orderId ?? null,
+      customer: cart.customer,
+      shipping_fee_cents: parseMoney(cart.shippingFee) ?? 0,
+      payment_method: 'cod',
+      lines: cart.lines.map((l) => ({ offer_id: l.offerId, qty: l.qty, variant_id: l.variantId ?? null, picks: l.picks ?? null })),
+    };
+    // Same order, unchanged, after a network failure: retry the confirmation itself (same request key),
+    // so a confirmation already applied by the server is returned instead of being refused.
+    if (confirm && cart.orderId && unanswered.current === JSON.stringify(payload)) {
+      busy.current = true;
+      try {
+        setLocalError(null);
+        const result = await confirmOrder.run({ p_order_id: cart.orderId });
+        if (!result) return;
+        unanswered.current = null;
+        finish({ kind: 'confirmed', number: result.number, orderId: cart.orderId, alerts: result.alerts });
+      } finally {
+        busy.current = false;
+      }
+      return;
+    }
+    unanswered.current = null;
     setLocalError(null);
     saveDraft.reset();
     confirmOrder.reset();
@@ -134,15 +159,7 @@ export function NewOrderPage() {
     }
     busy.current = true;
     try {
-      const saved = await saveDraft.run({
-        p_order: {
-          id: cart.orderId ?? null,
-          customer: cart.customer,
-          shipping_fee_cents: parseMoney(cart.shippingFee) ?? 0,
-          payment_method: 'cod',
-          lines: cart.lines.map((l) => ({ offer_id: l.offerId, qty: l.qty, variant_id: l.variantId ?? null, picks: l.picks ?? null })),
-        },
-      });
+      const saved = await saveDraft.run({ p_order: payload });
       if (!saved) return;
       setCart((c) => ({ ...c, orderId: saved.order_id }));
       if (!confirm) {
@@ -150,7 +167,10 @@ export function NewOrderPage() {
         return;
       }
       const result = await confirmOrder.run({ p_order_id: saved.order_id });
-      if (!result) return;
+      if (!result) {
+        unanswered.current = JSON.stringify({ ...payload, id: saved.order_id });
+        return;
+      }
       finish({ kind: 'confirmed', number: result.number, orderId: saved.order_id, alerts: result.alerts });
     } finally {
       busy.current = false;

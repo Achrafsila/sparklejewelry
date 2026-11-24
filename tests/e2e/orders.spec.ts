@@ -202,3 +202,25 @@ test('a double tap on Confirmer reserves only once', async ({ page }) => {
   expect(ordersAfter).toBe(ordersBefore + 1);
   expect(after).toBe(before + 1);
 });
+
+test('a confirmation whose answer is lost on the network is not applied twice when retried', async ({ page }) => {
+  const [{ reserved_qty: before }] = await sql(`select reserved_qty from variants where sku = 'JONC-OR'`);
+  await startOrder(page);
+  await addOffer(page, 'soleil', /Trio soleil/);
+  await next(page);
+  await fillCustomer(page, { phone: '0644556677', name: 'Hiba Z.' });
+  await next(page);
+  // The server confirms, but the answer never reaches the phone.
+  await page.route('**/rest/v1/rpc/confirm_order', async (route) => {
+    await route.fetch();
+    await route.abort('failed');
+  });
+  await page.getByRole('button', { name: 'Confirmer la commande' }).click();
+  await expect(page.getByText('Connexion impossible. Vérifiez le réseau puis réessayez.')).toBeVisible();
+  await page.unrouteAll();
+  await page.getByRole('button', { name: 'Confirmer la commande' }).click();
+  await expect(page.getByText(/Commande SPK-\d{4} confirmée/)).toBeVisible();
+  const [{ reserved_qty: after }] = await sql(`select reserved_qty from variants where sku = 'JONC-OR'`);
+  expect(after).toBe(before + 1);
+  expect(await sql(`select status from orders where customer_name = 'Hiba Z.'`)).toEqual([{ status: 'confirmee' }]);
+});

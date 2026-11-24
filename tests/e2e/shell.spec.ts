@@ -71,3 +71,20 @@ test('reduced motion turns transitions off', async ({ page }) => {
     .evaluate(() => getComputedStyle(document.querySelector('a, button')!).transitionDuration);
   expect(duration.split(',').every((d) => parseFloat(d) === 0)).toBe(true);
 });
+
+test('a password reset link leads to choosing a new password', async ({ page, request }) => {
+  const res = await request.post('/auth/v1/token?grant_type=password', { data: { email: admin.email, password: admin.password } });
+  const session = await res.json();
+  await page.goto(
+    `/connexion#access_token=${session.access_token}&refresh_token=${session.refresh_token}&expires_in=3600&expires_at=${session.expires_at}&token_type=bearer&type=recovery`,
+  );
+  await expect(page.getByRole('heading', { level: 1, name: 'Choisir un nouveau mot de passe' })).toBeVisible();
+  await page.getByLabel('Nouveau mot de passe', { exact: true }).fill('court');
+  await page.getByLabel('Confirmer le mot de passe').fill('court');
+  await page.getByRole('button', { name: 'Enregistrer le mot de passe' }).click();
+  await expect(page.getByText('Trop court : au moins 10 caractères.')).toBeVisible();
+  await page.getByLabel('Nouveau mot de passe', { exact: true }).fill('un-mot-de-passe-solide');
+  await page.getByLabel('Confirmer le mot de passe').fill('un-mot-de-passe-solide');
+  await page.getByRole('button', { name: 'Enregistrer le mot de passe' }).click();
+  await expect(page.getByText('Mot de passe mis à jour.')).toBeVisible();
+});

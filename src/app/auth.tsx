@@ -6,19 +6,27 @@ import { supabase } from '../lib/supabase';
 interface AuthState {
   session: Session | null;
   loading: boolean;
+  /** Arrived through a password reset link: a new password must be chosen. */
+  recovery: boolean;
+  endRecovery(): void;
 }
 
-const AuthContext = createContext<AuthState>({ session: null, loading: true });
+// Read before Supabase clears the link's fragment from the address bar.
+const recoveryLink = typeof window !== 'undefined' && /(^|[#&])type=recovery(&|$)/.test(window.location.hash);
+
+const AuthContext = createContext<AuthState>({ session: null, loading: true, recovery: false, endRecovery: () => {} });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ session: null, loading: true });
+  const [state, setState] = useState<{ session: Session | null; loading: boolean }>({ session: null, loading: true });
+  const [recovery, setRecovery] = useState(recoveryLink);
 
   useEffect(() => {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (active) setState({ session: data.session, loading: false });
     });
-    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') setRecovery(true);
       setState({ session, loading: false });
     });
     return () => {
@@ -27,7 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ ...state, recovery, endRecovery: () => setRecovery(false) }}>{children}</AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => useContext(AuthContext);
