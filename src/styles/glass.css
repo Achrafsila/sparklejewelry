@@ -1,0 +1,32 @@
+/* Liquid Glass: only for navigation, the action bar and floating surfaces.
+   Never behind a field, a table or a working panel. */
+.glass {
+  background: rgb(255 253 248 / 0.72);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / 0.65);
+  box-shadow:
+    inset 0 1px 0 rgb(201 180 138 / 0.45),
+    var(--shadow-float);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: var(--pearl);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: var(--pearl);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .glass {
+    background: var(--pearl);
+    border-color: var(--ink);
+  }
+}
