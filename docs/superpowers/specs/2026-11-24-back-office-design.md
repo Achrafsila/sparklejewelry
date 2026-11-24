@@ -4,7 +4,7 @@ Date : 2026-11-24 · Branche : `feat/back-office` · Statut : à valider
 
 ## 1. Intention
 
-Sparkle vend des bijoux, surtout par messages privés Instagram. Le back-office est l'outil quotidien de la gérante (un seul compte) pour :
+Sparkle vend des bijoux, surtout par messages privés Instagram. Le back-office est l'outil quotidien de gestion de Sparkle (un seul compte administrateur) pour :
 
 - réceptionner les arrivages et tenir un stock juste, référence par référence ;
 - composer des offres (à l'unité, trio fixe, trio à composer) sur ce stock commun ;
@@ -269,7 +269,7 @@ Mobile — Nouvelle commande (étape 1/3)
     - (=) marge estimée.
   - Le budget pub se saisit par mois, dans ce même écran.
 - **Réglages.** Seuil d'alerte, coût d'emballage par colis, frais de livraison par défaut, transporteurs, export de toutes les données (JSON), import d'un export du prototype, déconnexion.
-- **Connexion.** E-mail + mot de passe, « Mot de passe oublié ». Le compte est créé dans Supabase par la gérante, et les inscriptions sont désactivées.
+- **Connexion.** E-mail + mot de passe, « Mot de passe oublié ». Le compte est créé dans Supabase par le titulaire du compte administrateur, et les inscriptions sont désactivées.
 
 ### 8.4 Règles transverses
 

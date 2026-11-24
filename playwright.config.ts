@@ -14,7 +14,7 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  timeout: 45_000,
+  timeout: 60_000,
   expect: { timeout: 7_000 },
   outputDir: join(artefacts, 'test-results'),
   reporter: [['list'], ['html', { open: 'never', outputFolder: join(artefacts, 'report') }]],

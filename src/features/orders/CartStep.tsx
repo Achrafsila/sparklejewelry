@@ -60,7 +60,7 @@ export function CartStep({ cart, offers, stock, lineErrors, onChange }: Props) {
         items={searchable}
         getKey={(o) => o.id}
         getText={(o) => `${o.name} ${KIND_LABELS[o.kind]}`}
-        placeholder="Nom de l’offre"
+        placeholder="Trio, jonc, bague…"
         emptyText="Aucune offre active sur Instagram ne correspond."
         renderItem={(o) => (
           <span className="item-line">

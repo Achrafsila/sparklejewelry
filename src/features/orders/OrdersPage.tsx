@@ -103,7 +103,7 @@ export function OrdersPage() {
               <input
                 className="input"
                 type="search"
-                placeholder="Numéro, nom, @pseudo, téléphone, suivi"
+                placeholder="SPK-0001, nom, @pseudo, 06…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />

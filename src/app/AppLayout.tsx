@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef, useState, type MouseEvent } from 'react';
 import { Outlet, useLocation } from 'react-router';
+import { SearchButton, SearchProvider } from '../features/search/GlobalSearch';
 import { ActionBarSlot } from './ActionBar';
 import { BottomNav } from './BottomNav';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -36,6 +37,7 @@ export function AppLayout() {
 
   return (
     <ActionBarSlot.Provider value={slot}>
+    <SearchProvider>
     <div className="app">
       <a className="skip-link" href="#contenu" onClick={skipToContent}>
         Aller au contenu
@@ -43,6 +45,7 @@ export function AppLayout() {
       <Sidebar />
       <header className="topbar glass">
         <Wordmark />
+        <SearchButton />
       </header>
       <main id="contenu" ref={mainRef} tabIndex={-1} className="app-main">
         <div className="app-main__inner">
@@ -62,6 +65,7 @@ export function AppLayout() {
       <div id="action-bar-slot" ref={setSlot} />
       <BottomNav />
     </div>
+    </SearchProvider>
     </ActionBarSlot.Provider>
   );
 }

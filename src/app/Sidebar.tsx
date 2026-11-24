@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router';
+import { SearchButton } from '../features/search/GlobalSearch';
 import { supabase } from '../lib/supabase';
 import { IconLogout, IconPlus } from '../ui/icons';
 import { NAV_ITEMS, NEW_ORDER_PATH, SETTINGS_ITEM } from './nav';
@@ -11,6 +12,7 @@ export function Sidebar() {
       <div className="sidebar__brand">
         <Wordmark />
       </div>
+      <SearchButton />
       <Link to={NEW_ORDER_PATH} className="btn btn--primary sidebar__new" aria-label="Nouvelle commande Instagram">
         <IconPlus size={18} aria-hidden="true" />
         <span className="btn__long">Nouvelle commande Instagram</span>

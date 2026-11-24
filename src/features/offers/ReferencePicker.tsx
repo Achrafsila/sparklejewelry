@@ -35,7 +35,7 @@ export function ReferencePicker({ legend, stock, selected, onChange, error }: Pr
           className="input"
           type="search"
           aria-label={`Filtrer : ${legend}`}
-          placeholder="Filtrer par nom ou référence"
+          placeholder="Nom ou référence…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />

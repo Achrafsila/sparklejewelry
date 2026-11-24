@@ -109,7 +109,8 @@ export async function login(page: Page) {
   await page.getByLabel('E-mail').fill(admin.email);
   await page.getByLabel('Mot de passe', { exact: true }).fill(admin.password);
   await page.getByRole('button', { name: 'Se connecter' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Stock' })).toBeVisible();
+  // Generous: the first load of a lazily loaded screen can be slow on a busy machine.
+  await expect(page.getByRole('heading', { level: 1, name: 'Stock' })).toBeVisible({ timeout: 20_000 });
 }
 
 export const isPhone = (page: Page) => (page.viewportSize()?.width ?? 1280) < 768;

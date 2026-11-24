@@ -1,0 +1,48 @@
+.settings {
+  display: grid;
+  gap: var(--s-4);
+  max-width: 860px;
+}
+
+.carriers {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.carriers__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.carriers__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: var(--s-3);
+  border: 1px solid var(--stone-line);
+  border-radius: var(--r-pill);
+  background: var(--pearl);
+}
+
+.file-input {
+  min-height: 48px;
+  font: inherit;
+  color: var(--ink);
+}
+
+.file-input::file-selector-button {
+  margin-right: var(--s-3);
+  min-height: 44px;
+  padding: 0 var(--s-4);
+  border: 1px solid var(--stone-line);
+  border-radius: var(--r-pill);
+  background: var(--pearl);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}

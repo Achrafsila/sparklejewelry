@@ -488,6 +488,7 @@
 }
 
 .combobox__list {
+  overscroll-behavior: contain;
   position: absolute;
   z-index: var(--z-menu);
   top: calc(100% + 4px);
@@ -715,6 +716,7 @@
 .sheet__body {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: var(--s-5);
   display: grid;
   align-content: start;

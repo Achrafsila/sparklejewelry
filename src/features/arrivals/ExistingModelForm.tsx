@@ -106,7 +106,7 @@ export function ExistingModelForm({ stock, receipts, lines, onAdd }: Props) {
                 setSelected(s);
                 setErrors((e) => ({ ...e, variant: undefined }));
               }}
-              placeholder="Nom, variante ou référence"
+              placeholder="Nom, variante ou référence…"
               error={errors.variant}
             />
           )}

@@ -108,7 +108,7 @@ export function StockPage() {
               <input
                 className="input"
                 type="search"
-                placeholder="Modèle, variante ou référence"
+                placeholder="Modèle, variante ou référence…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
