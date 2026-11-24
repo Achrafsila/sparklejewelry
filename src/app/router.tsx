@@ -37,19 +37,34 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/stock" replace /> },
-      { path: 'stock', ...page(() => import('../features/stock/StockPage'), 'StockPage') },
+      // Detail panels are child routes: the list page stays mounted while a panel opens and closes.
+      {
+        path: 'stock',
+        ...page(() => import('../features/stock/StockPage'), 'StockPage'),
+        children: [{ path: ':variantId', element: null }],
+      },
       { path: 'stock/arrivage', ...page(() => import('../features/arrivals/ArrivalPage'), 'ArrivalPage') },
-      { path: 'stock/:variantId', ...page(() => import('../features/stock/StockPage'), 'StockPage') },
-      { path: 'offres', ...page(() => import('../features/offers/OffersPage'), 'OffersPage') },
-      { path: 'offres/nouvelle', ...page(() => import('../features/offers/OffersPage'), 'OffersPage') },
-      { path: 'offres/:offerId', ...page(() => import('../features/offers/OffersPage'), 'OffersPage') },
-      { path: 'commandes', ...page(() => import('../features/orders/OrdersPage'), 'OrdersPage') },
+      {
+        path: 'offres',
+        ...page(() => import('../features/offers/OffersPage'), 'OffersPage'),
+        children: [
+          { path: 'nouvelle', element: null },
+          { path: ':offerId', element: null },
+        ],
+      },
+      {
+        path: 'commandes',
+        ...page(() => import('../features/orders/OrdersPage'), 'OrdersPage'),
+        children: [{ path: ':orderId', element: null }],
+      },
       { path: 'commandes/nouvelle', ...page(() => import('../features/orders/NewOrderPage'), 'NewOrderPage') },
-      { path: 'commandes/:orderId', ...page(() => import('../features/orders/OrdersPage'), 'OrdersPage') },
       { path: 'preparation', ...page(() => import('../features/preparation/PreparationPage'), 'PreparationPage') },
-      { path: 'suivi', ...page(() => import('../features/tracking/TrackingPage'), 'TrackingPage') },
+      {
+        path: 'suivi',
+        ...page(() => import('../features/tracking/TrackingPage'), 'TrackingPage'),
+        children: [{ path: 'versements/:payoutId', element: null }],
+      },
       { path: 'suivi/versements/nouveau', ...page(() => import('../features/tracking/PayoutPage'), 'PayoutPage') },
-      { path: 'suivi/versements/:payoutId', ...page(() => import('../features/tracking/TrackingPage'), 'TrackingPage') },
       { path: 'pilotage', ...page(() => import('../features/dashboard/DashboardPage'), 'DashboardPage') },
       { path: 'reglages', ...page(() => import('../features/settings/SettingsPage'), 'SettingsPage') },
       { path: '*', element: <NotFound /> },

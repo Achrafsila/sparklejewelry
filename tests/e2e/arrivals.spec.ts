@@ -8,7 +8,7 @@ const asset = (name: string) => join(import.meta.dirname, 'assets', name);
 test.describe.configure({ mode: 'serial' });
 let page: Page;
 test.beforeAll(async ({ browser }, info) => {
-  resetDb();
+  await resetDb();
   page = await sharedPage(browser, info);
   await login(page);
 });

@@ -1,5 +1,5 @@
 import { useDeferredValue, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useMatch, useNavigate } from 'react-router';
 import { ActionBar } from '../../app/ActionBar';
 import { Segmented } from '../../ui/Controls';
 import { DataList, type Column } from '../../ui/DataList';
@@ -28,7 +28,7 @@ function stockStatus(row: StockRow) {
 }
 
 export function StockPage() {
-  const { variantId } = useParams();
+  const variantId = useMatch('/stock/:variantId')?.params.variantId;
   const navigate = useNavigate();
   const stock = useStock();
   const settings = useSettings();

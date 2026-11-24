@@ -12,23 +12,30 @@ const users = JSON.parse(readFileSync(join(root, 'dev', 'users.json'), 'utf8')) 
 export const admin = users.users[0]!;
 
 /** Fresh database for a spec file: shim + migrations + dev seed. */
-export function resetDb() {
+export async function resetDb() {
+  await pool?.end().catch(() => {});
+  pool = null;
   execSync('bash dev/stack.sh reset', { cwd: root, stdio: 'ignore' });
 }
 
-const pool = new pg.Pool({ connectionString: 'postgres://postgres@localhost:54329/sparkle', max: 2 });
-// resetDb() drops the database: idle connections are then closed by the server, which is expected.
-pool.on('error', () => {});
+let pool: pg.Pool | null = null;
+function db(): pg.Pool {
+  if (!pool) {
+    pool = new pg.Pool({ connectionString: 'postgres://postgres@localhost:54329/sparkle', max: 2 });
+    pool.on('error', () => {});
+  }
+  return pool;
+}
 
 /** Superuser query, to check what the UI really stored. */
 export async function sql<T = any>(text: string, params: unknown[] = []): Promise<T[]> {
-  const { rows } = await pool.query(text, params);
+  const { rows } = await db().query(text, params);
   return rows as T[];
 }
 
 /** Calls a business function as the admin, to set up data a test is not about. */
 export async function asAdmin<T = any>(fn: string, args: Record<string, unknown>): Promise<T> {
-  const client = await pool.connect();
+  const client = await db().connect();
   try {
     await client.query('begin');
     await client.query(`select set_config('request.jwt.claims', $1, true)`, [
