@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { PhotoSlot } from '../../ui/PhotoSlot';
+import './pickers.css';
 
 export interface TrioCandidate {
   variant_id: string;
@@ -54,7 +55,7 @@ export function TrioPicker({ mode, label, candidates, value, allowRepeat, onChan
               ) : (
                 <span className="trio__empty">
                   <PhotoSlot size={72} />
-                  <span className="trio__slot-name muted">Emplacement {slot + 1}</span>
+                  <span className="trio__slot-name muted">Pièce {slot + 1}</span>
                 </span>
               )}
             </li>

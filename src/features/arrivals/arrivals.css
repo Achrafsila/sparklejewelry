@@ -1,18 +1,3 @@
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 44px;
-  margin-bottom: var(--s-1);
-  color: var(--stone);
-  font-size: var(--text-s);
-  text-decoration: none;
-}
-
-.back-link:hover {
-  color: var(--ink);
-}
-
 .arrival {
   display: grid;
   gap: var(--s-4);

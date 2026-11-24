@@ -1,5 +1,6 @@
 import { useDeferredValue, useState } from 'react';
 import { PhotoSlot } from '../../ui/PhotoSlot';
+import './pickers.css';
 import type { StockRow } from '../stock/useStock';
 
 interface Props {
