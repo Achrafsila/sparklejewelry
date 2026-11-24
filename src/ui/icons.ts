@@ -1,0 +1,27 @@
+// Direct per-icon imports (no barrel): each icon is its own module.
+export { default as IconStock } from 'lucide-react/icons/gem';
+export { default as IconOffers } from 'lucide-react/icons/tag';
+export { default as IconOrders } from 'lucide-react/icons/shopping-bag';
+export { default as IconPreparation } from 'lucide-react/icons/package-check';
+export { default as IconTracking } from 'lucide-react/icons/truck';
+export { default as IconDashboard } from 'lucide-react/icons/chart-column';
+export { default as IconSettings } from 'lucide-react/icons/settings';
+export { default as IconPlus } from 'lucide-react/icons/plus';
+export { default as IconMinus } from 'lucide-react/icons/minus';
+export { default as IconSearch } from 'lucide-react/icons/search';
+export { default as IconMore } from 'lucide-react/icons/ellipsis';
+export { default as IconLogout } from 'lucide-react/icons/log-out';
+export { default as IconClose } from 'lucide-react/icons/x';
+export { default as IconCheck } from 'lucide-react/icons/check';
+export { default as IconCamera } from 'lucide-react/icons/camera';
+export { default as IconImage } from 'lucide-react/icons/image';
+export { default as IconAlert } from 'lucide-react/icons/triangle-alert';
+export { default as IconSuccess } from 'lucide-react/icons/circle-check';
+export { default as IconBack } from 'lucide-react/icons/chevron-left';
+export { default as IconRetry } from 'lucide-react/icons/refresh-cw';
+export { default as IconTrash } from 'lucide-react/icons/trash-2';
+export { default as IconEdit } from 'lucide-react/icons/pencil';
+export { default as IconPayout } from 'lucide-react/icons/wallet';
+export { default as IconReturn } from 'lucide-react/icons/undo-2';
+export { default as IconEye } from 'lucide-react/icons/eye';
+export { default as IconEyeOff } from 'lucide-react/icons/eye-off';

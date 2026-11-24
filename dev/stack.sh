@@ -42,14 +42,18 @@ apply_schema() {
 }
 
 stop_postgrest() {
-  if [ -f "$LOCAL/postgrest.pid" ]; then
-    kill "$(cat "$LOCAL/postgrest.pid")" 2> /dev/null || true
-    rm -f "$LOCAL/postgrest.pid"
-  fi
+  pkill -f "postgrest $ROOT/dev/postgrest.conf" 2> /dev/null || true
+  rm -f "$LOCAL/postgrest.pid"
+  for _ in $(seq 1 30); do
+    curl -s -o /dev/null http://127.0.0.1:54331/ || return 0
+    sleep 0.1
+  done
 }
 
+postgrest_up() { curl -s -o /dev/null http://127.0.0.1:54331/; }
+
 start_postgrest() {
-  stop_postgrest
+  if postgrest_up; then return 0; fi
   postgrest "$ROOT/dev/postgrest.conf" > "$LOCAL/postgrest.log" 2>&1 &
   echo $! > "$LOCAL/postgrest.pid"
   for _ in $(seq 1 50); do

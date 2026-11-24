@@ -17,7 +17,11 @@ begin
   end if;
 end $$;
 
-grant anon, authenticated, service_role to authenticator;
+do $$ begin
+  if not pg_has_role('authenticator', 'anon', 'member') then
+    grant anon, authenticated, service_role to authenticator;
+  end if;
+end $$;
 
 create schema if not exists auth;
 

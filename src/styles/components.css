@@ -1,0 +1,263 @@
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: var(--text-s);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+.btn--primary {
+  background: var(--ink);
+  color: var(--pearl);
+}
+
+.btn--primary:hover {
+  background: var(--ink-soft);
+}
+
+.btn--secondary {
+  background: var(--pearl);
+  color: var(--ink);
+  border-color: var(--stone-line);
+}
+
+.btn--secondary:hover {
+  border-color: var(--stone);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+}
+
+.btn--ghost:hover {
+  background: rgb(34 33 30 / 0.06);
+}
+
+.btn--danger {
+  background: var(--pearl);
+  color: var(--err);
+  border-color: rgb(163 48 42 / 0.35);
+}
+
+.btn--danger:hover {
+  background: var(--err-bg);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--small {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: var(--text-xs);
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn[aria-busy='true'] {
+  opacity: 0.85;
+  cursor: progress;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+}
+
+.icon-btn:hover {
+  background: rgb(34 33 30 / 0.06);
+}
+
+.icon-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+}
+
+/* Page header (same structure on every screen) */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3) var(--s-4);
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: var(--s-5);
+}
+
+.page-header__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.page-header__count {
+  color: var(--stone);
+  font-size: var(--text-s);
+}
+
+.page-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.page-header__filters {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: center;
+}
+
+/* Working surfaces: opaque */
+.panel {
+  background: var(--pearl);
+  border: 1px solid var(--stone-line);
+  border-radius: var(--r-card);
+  padding: var(--s-5);
+}
+
+.panel + .panel {
+  margin-top: var(--s-4);
+}
+
+.panel__title {
+  margin-bottom: var(--s-4);
+}
+
+@media (max-width: 767px) {
+  .panel {
+    padding: var(--s-4);
+  }
+}
+
+/* Inline status near an action */
+.inline-status {
+  display: flex;
+  gap: var(--s-2);
+  align-items: flex-start;
+  min-height: 1.5em;
+  margin-top: var(--s-2);
+  font-size: var(--text-s);
+}
+
+.inline-status--success {
+  color: var(--ok);
+}
+
+.inline-status--error {
+  color: var(--err);
+}
+
+.inline-status--pending {
+  color: var(--stone);
+}
+
+.inline-status ul {
+  margin: var(--s-1) 0 0;
+  padding-left: 1.1em;
+}
+
+/* Notices */
+.notice {
+  display: flex;
+  gap: var(--s-3);
+  align-items: flex-start;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--r-field);
+  font-size: var(--text-s);
+}
+
+.notice--warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.notice--info {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.notice--ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.notice--err {
+  background: var(--err-bg);
+  color: var(--err);
+}
+
+.notice__body {
+  display: grid;
+  gap: var(--s-1);
+  color: var(--ink);
+}
+
+.notice__title {
+  font-weight: 600;
+}
+
+/* Empty state */
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--s-3);
+  padding: var(--s-6) var(--s-5);
+  border: 1px dashed var(--stone-line);
+  border-radius: var(--r-card);
+  background: rgb(255 253 248 / 0.6);
+}
+
+.empty__title {
+  font-weight: 600;
+}
+
+.empty__text {
+  color: var(--stone);
+  max-width: 52ch;
+}

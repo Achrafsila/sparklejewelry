@@ -1,0 +1,10 @@
+{
+  "note": "Local test account for the dev stub and E2E tests only.",
+  "users": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "email": "admin@sparkle.test",
+      "password": "G2KWqFUIpbC9xMIm"
+    }
+  ]
+}
