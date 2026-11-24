@@ -83,6 +83,13 @@ describe('errors', () => {
     expect(messageFor(e)).toMatch(/Connexion impossible/);
   });
 
+  test.each(['TypeError: Load failed', 'TypeError: Failed to fetch', 'NetworkError when attempting to fetch resource.'])(
+    'a network failure reported by supabase-js as %j becomes RESEAU (Safari, Chrome, Firefox)',
+    (message) => {
+      expect(toAppError({ message, details: '', hint: '', code: '' }).code).toBe('RESEAU');
+    },
+  );
+
   test('trio reasons have their own message', () => {
     expect(messageFor(new AppError('TRIO_INVALIDE', { reason: 'repeat' }))).toMatch(/même pièce/);
     expect(messageFor(new AppError('TRIO_INVALIDE', { reason: 'count' }))).toMatch(/trois pièces/);

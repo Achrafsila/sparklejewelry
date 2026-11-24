@@ -39,7 +39,7 @@ export function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setPending(false);
     if (error) {
-      const network = /fetch|network/i.test(error.message);
+      const network = /fetch|network|load failed/i.test(error.message);
       setStatus({
         kind: 'error',
         text: network ? 'Connexion impossible. Vérifiez le réseau puis réessayez.' : 'E-mail ou mot de passe incorrect.',

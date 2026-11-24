@@ -27,7 +27,8 @@ export function toAppError(error: unknown): AppError {
     const e = error as { message: string; details?: unknown; code?: string };
     if (e.code === 'P0001' || /^[A-Z_]+$/.test(e.message)) return new AppError(e.message, parseDetails(e.details));
     if (e.code === '42501' || e.code === 'PGRST301' || e.code === 'PGRST303') return new AppError('NON_AUTORISE');
-    if (/fetch|network/i.test(e.message)) return new AppError('RESEAU');
+    // Chrome: "Failed to fetch", Safari: "Load failed", Firefox: "NetworkError…".
+    if (/fetch|network|load failed/i.test(e.message)) return new AppError('RESEAU');
     return new AppError('INCONNUE', e.message);
   }
   return new AppError('INCONNUE', String(error));
