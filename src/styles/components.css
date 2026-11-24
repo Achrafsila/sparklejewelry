@@ -864,3 +864,8 @@
   flex-wrap: wrap;
   gap: 0 var(--s-5);
 }
+
+.arrival-line__caption {
+  font-size: var(--text-xs);
+  color: var(--stone);
+}

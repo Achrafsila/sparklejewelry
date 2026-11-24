@@ -1,0 +1,95 @@
+.prep-list {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.prep-list__title {
+  margin-top: var(--s-2);
+  color: var(--stone);
+  font-size: var(--text-s);
+}
+
+.prep-card {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.prep-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--s-2);
+}
+
+.prep-card__title {
+  font-size: var(--text-l);
+}
+
+.prep-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: flex-start;
+}
+
+.prep-card__body {
+  display: grid;
+  gap: var(--s-4);
+}
+
+@media (min-width: 1024px) {
+  .prep-card__body {
+    grid-template-columns: 1fr 1.4fr;
+  }
+}
+
+.prep-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.pick-list {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pick {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 64px;
+  padding: 6px 12px;
+  border: 1px solid var(--stone-line);
+  border-radius: var(--r-field);
+  background: var(--pearl);
+  cursor: pointer;
+}
+
+.pick.is-picked {
+  border-color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.pick.is-picked .item-line__name {
+  text-decoration: line-through;
+  text-decoration-color: rgb(47 107 79 / 0.5);
+}
+
+.ship-form {
+  display: grid;
+  gap: var(--s-3);
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--stone-soft);
+}
+
+@media (min-width: 1024px) {
+  .form-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
