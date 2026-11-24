@@ -766,3 +766,9 @@
   color: var(--stone);
   margin-bottom: var(--s-2);
 }
+
+@media (max-width: 767px) {
+  .page-header__actions--wide {
+    display: none;
+  }
+}

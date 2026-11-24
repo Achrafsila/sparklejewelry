@@ -1,0 +1,130 @@
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 260px;
+  max-width: 420px;
+  color: var(--stone);
+}
+
+.search svg {
+  position: absolute;
+  left: 14px;
+  pointer-events: none;
+}
+
+.search .input {
+  padding-left: 42px;
+}
+
+.stock-alert {
+  margin-bottom: var(--s-4);
+}
+
+.stock-alert__list {
+  margin: 0;
+  padding-left: 1.1em;
+  display: grid;
+  gap: 2px;
+}
+
+.link-button {
+  justify-self: start;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--champagne-ink);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sku {
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+
+.available {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--s-2);
+}
+
+.stock-card {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  color: inherit;
+  text-decoration: none;
+  min-height: 72px;
+}
+
+.stock-card__text {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+}
+
+.stock-card__status {
+  display: block;
+  margin-top: 4px;
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+
+.figures__cell {
+  display: grid;
+  gap: 0;
+}
+
+.figures__label {
+  font-size: var(--text-xs);
+  color: var(--stone);
+}
+
+.figures__cell b {
+  font-size: var(--text-l);
+  font-variant-numeric: tabular-nums;
+}
+
+.variant-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.plain-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+}
+
+.plain-list__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--stone-soft);
+  font-size: var(--text-s);
+}
+
+.plain-list__row:last-child {
+  border-bottom: 0;
+}
+
+.sheet-section {
+  display: grid;
+  gap: var(--s-3);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--stone-soft);
+}

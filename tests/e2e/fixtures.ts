@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { expect, test as base, type Page } from '@playwright/test';
+import { expect, test as base, type Browser, type Page, type TestInfo } from '@playwright/test';
 import pg from 'pg';
 
 const root = join(import.meta.dirname, '..', '..');
@@ -17,6 +17,8 @@ export function resetDb() {
 }
 
 const pool = new pg.Pool({ connectionString: 'postgres://postgres@localhost:54329/sparkle', max: 2 });
+// resetDb() drops the database: idle connections are then closed by the server, which is expected.
+pool.on('error', () => {});
 
 /** Superuser query, to check what the UI really stored. */
 export async function sql<T = any>(text: string, params: unknown[] = []): Promise<T[]> {
@@ -141,6 +143,26 @@ export async function contrastOf(page: Page, selector: string, pseudo?: '::place
     },
     { selector, pseudo },
   );
+}
+
+/**
+ * One page shared by the steps of a serial flow (an arrival built across several tests),
+ * created with the current project's device settings.
+ */
+export async function sharedPage(browser: Browser, info: TestInfo): Promise<Page> {
+  const u = info.project.use;
+  const context = await browser.newContext({
+    baseURL: u.baseURL,
+    viewport: u.viewport,
+    isMobile: u.isMobile,
+    hasTouch: u.hasTouch,
+    userAgent: u.userAgent,
+    deviceScaleFactor: u.deviceScaleFactor,
+    colorScheme: u.colorScheme,
+    locale: u.locale,
+    timezoneId: u.timezoneId,
+  });
+  return context.newPage();
 }
 
 export const test = base;

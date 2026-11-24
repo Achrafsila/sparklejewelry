@@ -56,6 +56,13 @@
 
 .sidebar__new {
   margin: 0 var(--s-1);
+  justify-content: flex-start;
+  min-height: 52px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.25;
 }
 
 .sidebar__new .btn__short {
@@ -393,4 +400,11 @@
   display: grid;
   place-items: center;
   color: var(--stone);
+}
+
+@media (max-width: 767px) {
+  .action-bar__inner > .btn:only-child,
+  .action-bar__inner > :only-child .btn {
+    flex: 1;
+  }
 }

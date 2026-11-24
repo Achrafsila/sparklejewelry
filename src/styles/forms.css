@@ -2,6 +2,7 @@
    so they stay readable whatever the device theme (Safari in dark mode included). */
 .field {
   display: grid;
+  align-content: start;
   gap: 6px;
   min-width: 0;
 }

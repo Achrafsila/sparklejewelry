@@ -14,8 +14,8 @@ export async function callRpc<T>(fn: string, args: Record<string, unknown> = {})
 }
 
 /** Unwraps a PostgREST read, mapping errors to AppError. */
-export async function read<T>(query: PromiseLike<{ data: T | null; error: unknown }>): Promise<T> {
-  let result: { data: T | null; error: unknown };
+export async function read<T>(query: PromiseLike<{ data: unknown; error: unknown }>): Promise<T> {
+  let result: { data: unknown; error: unknown };
   try {
     result = await query;
   } catch (e) {
