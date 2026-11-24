@@ -204,6 +204,13 @@ test('a double tap on Confirmer reserves only once', async ({ page }) => {
 });
 
 test('a confirmation whose answer is lost on the network is not applied twice when retried', async ({ page }) => {
+  // Earlier tests used up the bronzes: restock so this order can be confirmed.
+  await asAdmin('validate_receipt', {
+    p_request_id: randomUUID(),
+    p_supplier: 'Atelier Casa',
+    p_received_on: '2026-11-21',
+    p_lines: [{ variant_id: v['JONC-BRONZE'], qty: 5, unit_cost_cents: 3000 }],
+  });
   const [{ reserved_qty: before }] = await sql(`select reserved_qty from variants where sku = 'JONC-OR'`);
   await startOrder(page);
   await addOffer(page, 'soleil', /Trio soleil/);
