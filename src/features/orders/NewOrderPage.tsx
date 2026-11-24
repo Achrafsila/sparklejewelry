@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { useSWRConfig } from 'swr';
 import { ActionBar } from '../../app/ActionBar';
@@ -115,7 +115,7 @@ export function NewOrderPage() {
     if (fee != null && cart.shippingFee === '' && !cart.orderId) setCart((c) => ({ ...c, shippingFee: centsToInput(fee) }));
   }, [settings.data, cart.shippingFee, cart.orderId, setCart]);
 
-  const setStep = (step: Cart['step']) => setCart((c) => ({ ...c, step }));
+  const setStep = useCallback((step: Cart['step']) => setCart((c) => ({ ...c, step })), [setCart]);
   const totals = cartTotals(cart, offerMap);
 
   async function submit(confirm: boolean) {

@@ -13,6 +13,8 @@ export default defineConfig(async ({ command, mode }) => {
     plugins,
     server: localStack
       ? {
+          // Test artefacts, local storage and ledgers change constantly: never reload the app for them.
+          watch: { ignored: ['**/test-results/**', '**/playwright-report/**', '**/.local/**', '**/.superpowers/**', '**/docs/**'] },
           proxy: {
             '/rest/v1': {
               target: 'http://127.0.0.1:54331',
