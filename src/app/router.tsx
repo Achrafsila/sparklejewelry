@@ -20,8 +20,15 @@ function NotFound() {
   );
 }
 
+// Component gallery for automated UI checks; compiled out of production builds.
+const devRoutes =
+  import.meta.env.MODE === 'local-stack'
+    ? [{ path: '/dev/ui', ...page(() => import('../dev/UiKitPage'), 'UiKitPage') }]
+    : [];
+
 export const router = createBrowserRouter([
   { path: '/connexion', element: <LoginPage /> },
+  ...devRoutes,
   {
     element: (
       <RequireAuth>
