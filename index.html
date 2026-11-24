@@ -3,6 +3,7 @@
 <title>Sparkle — Back-office</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f8f6f2;color:#26251f;font:15px system-ui,sans-serif}aside{background:#212820;color:#fff;padding:28px;min-height:100vh;position:fixed;width:235px}strong.brand{font:32px Georgia;display:block;margin-bottom:32px}nav{display:grid;gap:8px}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:8px;padding:10px 14px;background:#eae8df;color:#26251f}nav button{text-align:left;background:transparent;color:white}nav button.active,.primary{background:#315b45;color:white}main{margin-left:235px;padding:45px clamp(20px,5vw,75px);max-width:1400px}h1{font:42px Georgia;margin:0 0 14px}h2{font:26px Georgia}p{line-height:1.55}.muted{color:#68675d}section,form{background:white;border:1px solid #e8e3d8;border-radius:14px;padding:20px;margin:18px 0}.grid,.row{display:flex;gap:12px;flex-wrap:wrap;align-items:end}.grid>*{flex:1;min-width:150px}label{display:grid;gap:5px;font-size:13px}input,select{min-width:0;width:100%;border:1px solid #d8d3c8;border-radius:7px;padding:9px;background:white}table{width:100%;border-collapse:collapse;text-align:left}td,th{padding:11px 8px;border-bottom:1px solid #eee9de}th{font-size:12px;color:#68675d}.scroll{overflow:auto}.alert{color:#86551d;background:#fff3dd;padding:10px;border-radius:8px}.thumb{width:42px;height:42px;object-fit:cover;border-radius:7px;vertical-align:middle;margin-right:8px}.notice{min-height:24px;color:#315b45}.error{color:#a32727}.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#eeeee5;font-size:12px}.line{padding:10px 0;border-bottom:1px solid #eee9de}small{display:block;margin-top:6px}@media(max-width:720px){aside{position:static;width:auto;min-height:0;padding:15px}strong.brand{margin-bottom:10px}nav{display:flex;overflow:auto}nav button{white-space:nowrap}main{margin:0;padding:22px 14px}h1{font-size:34px}section,form{padding:14px}}
+.arrival-layout{display:grid;grid-template-columns:3fr 2fr;gap:16px;align-items:start}.arrival-layout form{margin:0;min-width:0}.arrival-layout h3{margin:0 0 16px}.arrival-layout fieldset{margin:16px 0;border:1px solid #e8e3d8;border-radius:8px;min-width:0}.arrival-layout input[type=file]{font-size:13px}@media(max-width:900px){.arrival-layout{grid-template-columns:1fr}}
 </style>
 <aside><strong class="brand">Sparkle</strong><nav aria-label="Navigation"></nav></aside>
 <main><div id="notice" class="notice" role="status"></div><div id="view"></div></main>
@@ -54,12 +55,30 @@ function stock(){
   return `<h1>Stock</h1><p class="muted">Arrivages et disponibilités par référence.</p>
   ${low.map(v=>`<p class="alert">Stock bas · ${e(name(v.sku))} · ${available(v.sku)} disponible(s)${data.offers.filter(o=>o.skus.includes(v.sku)).map(o=>' · '+e(o.title)).join('')}</p>`).join('')}
   <section>${table(['Bijou','Référence','Physique','Réservé','Disponible'],data.variants.map(v=>[`${v.photo?`<img class="thumb" alt="" src="${e(v.photo)}">`:''}${e(name(v.sku))}`,e(v.sku),v.physical,reserved(v.sku),available(v.sku)]),'Aucune référence enregistrée.')}</section>
-  <h2>Réceptionner un arrivage</h2>
-  <form id="receipt-line"><div class="grid">${selectable('Référence existante','existing','<option value="">Nouveau modèle ou variante</option>'+skuOptions())}
-  <label>Modèle<input name="model" list="models"><datalist id="models">${[...new Set(data.variants.map(v=>v.model))].map(m=>`<option value="${e(m)}"></option>`).join('')}</datalist></label>
-  <label>Variante<input name="variant" placeholder="Argenté"></label><label>Référence<input name="sku" placeholder="Générée si vide"></label>
-  ${required('Quantité reçue','qty','type="number" min="1" step="1"')}${amount('Coût unitaire fournisseur','cost')}<label>Photo<input name="photo" type="file" accept="image/png,image/jpeg,image/webp"></label></div>
-  <p><button class="primary">Ajouter à l’arrivage</button></p></form>
+  <h2>Nouvel arrivage</h2>
+  <div class="arrival-layout">
+   <form id="receipt-new">
+    <h3>Nouveau modèle</h3>
+    <div class="grid">
+     <label>Référence<input name="sku" placeholder="Générée si vide"></label>
+     ${required('Modèle','model','list="models"')}<datalist id="models">${[...new Set(data.variants.map(v=>v.model))].map(m=>`<option value="${e(m)}"></option>`).join('')}</datalist>
+     <label>Variante (facultatif)<input name="variant" placeholder="Argenté"></label>
+     ${required('Quantité','qty','type="number" min="1" step="1"')}${amount('Coût unitaire (MAD)','cost')}
+    </div>
+    <fieldset><legend>Photo</legend><div class="grid">
+     <label>Choisir une photo<input name="photo" type="file" accept="image/*"></label>
+     <label>Prendre une photo<input name="camera" type="file" accept="image/*" capture="environment"></label>
+    </div></fieldset>
+    <button class="primary">Ajouter à l’arrivage</button>
+   </form>
+   <form id="receipt-existing">
+    <h3>Modèle existant</h3>
+    ${data.variants.length?`<div class="grid">
+     ${selectable('Modèle et variante','existing','<option value="">Sélectionner</option>'+options(data.variants.map(v=>[v.sku,name(v.sku)+' · '+v.sku])))}
+     ${required('Quantité','qty','type="number" min="1" step="1"')}${amount('Coût unitaire (MAD)','cost')}
+    </div><p><button class="primary">Ajouter à l’arrivage</button></p>`:'<p class="muted">Les modèles apparaîtront ici après validation de leur premier arrivage.</p>'}
+   </form>
+  </div>
   ${receipt.length?`<form id="receipt"><div class="grid">${required('Fournisseur','supplier')}${required('Date de réception','received','type="date" value="'+date().slice(0,10)+'"')}</div>
   ${table(['Référence','Quantité','Coût unitaire',''],receipt.map((r,i)=>[e(r.sku),r.qty,money(r.cost),button('Retirer','remove-receipt',i)]),'')}
   <p><button class="primary">Valider l’arrivage</button></p></form>`:''}
@@ -122,8 +141,25 @@ function render(){
 }
 function image(file){
  if(!file?.size)return Promise.resolve('');
- if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>1_500_000)throw Error('Choisis une photo JPEG, PNG ou WebP de 1,5 Mo maximum.');
- return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(Error('Lecture de la photo impossible.'));reader.readAsDataURL(file);});
+ if(!file.type.startsWith('image/'))throw Error('Choisis un fichier image.');
+ return new Promise((resolve,reject)=>{
+  const url=URL.createObjectURL(file);
+  const photo=new Image();
+  photo.onload=()=>{
+   URL.revokeObjectURL(url);
+   const scale=Math.min(1,960/Math.max(photo.width,photo.height));
+   const canvas=document.createElement('canvas');
+   canvas.width=Math.max(1,Math.round(photo.width*scale));
+   canvas.height=Math.max(1,Math.round(photo.height*scale));
+   const ctx=canvas.getContext('2d');
+   ctx.fillStyle='#fff';
+   ctx.fillRect(0,0,canvas.width,canvas.height);
+   ctx.drawImage(photo,0,0,canvas.width,canvas.height);
+   resolve(canvas.toDataURL('image/jpeg',0.8));
+  };
+  photo.onerror=()=>{URL.revokeObjectURL(url);reject(Error('Format illisible. Essaie une photo JPEG ou PNG.'));};
+  photo.src=url;
+ });
 }
 function checkStock(lines){
  for(const [sku,qty] of Object.entries(needs(lines.flatMap(l=>l.items)))) if(qty>available(sku))throw Error(`Stock insuffisant · ${name(sku)} · ${qty} demandé(s), ${available(sku)} disponible(s).`);
@@ -162,15 +198,18 @@ document.addEventListener('submit',async event=>{
  const form=event.target;
  const f=new FormData(form);
  try{
-  if(form.id==='receipt-line'){
+  if(['receipt-new','receipt-existing'].includes(form.id)){
    const existing=bySku(f.get('existing'));
-   const model=existing?.model||f.get('model').trim();
-   const variant=existing?.variant||f.get('variant').trim();
+   if(form.id==='receipt-existing'&&!existing)throw Error('Sélectionne un modèle et sa variante.');
+   const model=existing?.model??f.get('model').trim();
+   const variant=existing?.variant??f.get('variant').trim();
    if(!model)throw Error('Indique le nom du modèle.');
    const same=data.variants.find(v=>v.model.toLowerCase()===model.toLowerCase()&&v.variant.toLowerCase()===variant.toLowerCase());
-   const sku=existing?.sku||same?.sku||(f.get('sku').trim()||[model,variant].filter(Boolean).join('-')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9-]+/g,'-');
+   if(same&&!existing)throw Error('Cette référence existe déjà. Utilise Modèle existant pour la réapprovisionner.');
+   const sku=existing?.sku||(f.get('sku').trim()||[model,variant].filter(Boolean).join('-')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9-]+/g,'-');
    if(!sku||(!existing&&!same&&bySku(sku))||receipt.some(r=>r.sku===sku))throw Error('Référence déjà utilisée ou déjà présente dans cet arrivage.');
-   const photo=existing?.photo||same?.photo||await image(f.get('photo'));
+   const photo=existing ? existing.photo : await image(f.get('camera')?.size ? f.get('camera') : f.get('photo'));
+   if(receipt.some(r=>r.sku===sku))throw Error('Référence déjà présente dans cet arrivage.');
    receipt.push({sku,model,variant,qty:Number(f.get('qty')),cost:cents(f.get('cost')),photo});
    render();message('Ligne ajoutée à l’arrivage.');
   }
