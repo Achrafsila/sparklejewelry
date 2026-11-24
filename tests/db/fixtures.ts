@@ -88,6 +88,32 @@ export function confirm(admin: pg.PoolClient, orderId: string, request = randomU
   return rpc(admin, 'confirm_order', { p_request_id: request, p_order_id: orderId });
 }
 
+/** Ticks every piece, marks the order prepared and ships it. */
+export async function ship(admin: pg.PoolClient, orderId: string, carrier = 'Amana', transport = 3500) {
+  const { rows } = await admin.query(`select id from order_items where order_id = $1`, [orderId]);
+  for (const r of rows) await rpc(admin, 'set_item_picked', { p_item_id: r.id, p_picked: true });
+  await rpc(admin, 'mark_prepared', { p_request_id: randomUUID(), p_order_id: orderId });
+  return rpc(admin, 'ship_order', {
+    p_request_id: randomUUID(),
+    p_order_id: orderId,
+    p_carrier: carrier,
+    p_tracking: 'TRK-' + orderId.slice(0, 6),
+    p_transport_cost_cents: transport,
+  });
+}
+
+/** Draft, confirm and ship in one go. */
+export async function shippedOrder(admin: pg.PoolClient, lines: LineInput[], carrier = 'Amana', transport = 3500) {
+  const d = await draft(admin, lines);
+  await confirm(admin, d.order_id);
+  await ship(admin, d.order_id, carrier, transport);
+  return d.order_id;
+}
+
+export function step(admin: pg.PoolClient, fn: string, orderId: string, extra: Record<string, unknown> = {}) {
+  return rpc(admin, fn, { p_request_id: randomUUID(), p_order_id: orderId, ...extra });
+}
+
 export async function quantities(pool: pg.Pool, id: string) {
   const { rows } = await pool.query(`select physical_qty, reserved_qty, available_qty from variants where id = $1`, [id]);
   return rows[0] as { physical_qty: number; reserved_qty: number; available_qty: number };
